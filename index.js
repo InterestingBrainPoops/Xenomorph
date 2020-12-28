@@ -55,7 +55,7 @@ function print(str) {
   // python much?
   console.log(str);
 }
-
+function getscore(snakes, you , food){}
 function manhattan(p1, p2) {
   return (Math.abs(p2.x-p1.x) + Math.abs(p2.y-p1.y));
 }
