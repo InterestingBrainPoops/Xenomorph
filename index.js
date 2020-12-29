@@ -22,7 +22,7 @@ function handleIndex(request, response) {
   var battlesnakeInfo = {
     apiversion: '1',
     author: 'BrokenKeyboard',
-    color: '#111111',
+    color: '#abffbe',
     head: 'smile',
     tail: 'block-bum'
   }
@@ -32,7 +32,7 @@ function add(p1, p2) {
     return {x : p1.x + p2.x, y: p1.y+p2.y};
 }
 function dist(head, dest) {
-    return (dest.x-head.x)**2 + (dest.y-head.y)**2;
+    return Math.sqrt((dest.x-head.x)**2 + (dest.y-head.y)**2);
 }
 function isLegal(pos, size) {
   return pos.x < size.width && pos.x >= 0 && pos.y < size.height && pos.y >= 0;
@@ -55,7 +55,21 @@ function print(str) {
   // python much?
   console.log(str);
 }
-function getscore(snakes, you , food){}
+function getscore(snakes, you , food){
+let ret = [];
+  for(let x = 0; x < food.length; x++){
+    let num = 0;
+    for(let snake = 0; snake < snakes.length; snake ++){
+      if(snakes[snake].id != you.id){
+        num += 3^dist(food[x], snakes[snake].head)
+      }else{
+        num += 100/dist(food[x], snakes[snake].head)
+      }
+    }
+    ret.push(num);
+  }
+  return ret;
+}
 function manhattan(p1, p2) {
   return (Math.abs(p2.x-p1.x) + Math.abs(p2.y-p1.y));
 }
@@ -93,6 +107,8 @@ function handleMove(request, response) {
   var max = 1000;
   var move = 0;
   let desiredfood = {x: 100000, y:10000};
+  let cfood = 0; 
+  let lowscore = 0;
   // find closest food
   // find smallest length snake's id
   let smalllength = 1000;
@@ -108,14 +124,18 @@ function handleMove(request, response) {
   }
   //print(gameData.board.snakes[smallsnakepos]["length"])
   //desiredfood = {x: 100000, y:10000};
+  let foods = getscore(gameData.board.snakes, gameData.you, gameData.board.food);
   // find closest food
   for(let x = 0; x < gameData.board.food.length; x++){
-    if(dist(gameData.you.head, desiredfood)>dist(gameData.you.head, gameData.board.food[x])){
-      desiredfood = gameData.board.food[x];
+    if(lowscore< foods[x]){
+      cfood = x;
+      lowscore = foods[x];
     }
   }
   if(gameData.you["length"] > gameData.board.snakes[smallsnakepos]["length"]){
     desiredfood = gameData.board.snakes[smallsnakepos].head;
+  }else{
+    desiredfood = gameData.board.food[cfood];
   }
   for(let x = 0; x < 4; x++){
     //print(add(gameData.you.head, possibleMoves[x]))
