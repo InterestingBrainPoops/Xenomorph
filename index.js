@@ -97,7 +97,8 @@ function handleMove(request, response) {
 
     }
   }
-  
+  grid.setWalkableAt(gameData.you.head.x, gameData.board.height-gameData.you.head.y-1, true);
+
   var possibleMoves = [{x:0,y:1}, {x:0,y:-1}, {x:1,y:0}, {x:-1,y: 0}];
   var actualmoves = ["up", "down", "right", "left"];
   var max = 1000;
@@ -127,6 +128,11 @@ function handleMove(request, response) {
   }else{
     desiredfood = gameData.board.food[cfood];
   }
+
+  let path = PF.findPath(gameData.you.head.x, gameData.board.height-gameData.you.head.y-1, desiredfood.x, gameData.board.height-1-desiredfood-y, grid);
+  let directionToGo = {x : path[0][0] - path[1][0], y : -(path[0][1] - path[1][1])};
+  print(directionToGo);
+
   for(let x = 0; x < 4; x++){
     if(!within(snekbodylist, add(gameData.you.head, possibleMoves[x])) && isLegal(add(gameData.you.head, possibleMoves[x]), {height: gameData.board.height, width: gameData.board.width})){
       if(dist(add(gameData.you.head, possibleMoves[x]), desiredfood) < max && !notnear(gameData.board.snakes,add(gameData.you.head, possibleMoves[x]), gameData.you)){
