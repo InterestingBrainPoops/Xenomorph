@@ -77,7 +77,6 @@ function manhattan(p1, p2) {
 function within(list, obj) {
   for(let x = 0; x < list.length; x++) {
     if(_.isEqual(list[x], obj)){
-      // print("I got here");
       return true;
     }
   }
@@ -98,32 +97,23 @@ function handleMove(request, response) {
 
     }
   }
-  // grid.setWalkableAt(gameData.you.head.x, gameData.board.height-gameData.you.head.y-1, true);
-  //console.log(gameData.you.body[0]);
-  // console.log(gameData.you.head);
+  
   var possibleMoves = [{x:0,y:1}, {x:0,y:-1}, {x:1,y:0}, {x:-1,y: 0}];
   var actualmoves = ["up", "down", "right", "left"];
-  //print(move)
   var max = 1000;
   var move = 0;
   let desiredfood = {x: 100000, y:10000};
   let cfood = 0; 
   let lowscore = 0;
-  // find closest food
-  // find smallest length snake's id
   let smalllength = 1000;
   let smallsnakepos = {};
-  // print(gameData.board.snakes)
   for(let x = 0; x < gameData.board.snakes.length; x++){
     if(gameData.board.snakes[x]["length"] < smalllength && gameData.board.snakes[x].id != gameData.you.id){
       print("Got here")
       smalllength = gameData.board.snakes[x]["length"];
-      //print(gameData.board.snakes[x]["length"]);
       smallsnakepos = x;
     }
   }
-  //print(gameData.board.snakes[smallsnakepos]["length"])
-  //desiredfood = {x: 100000, y:10000};
   let foods = getscore(gameData.board.snakes, gameData.you, gameData.board.food);
   // find closest food
   for(let x = 0; x < gameData.board.food.length; x++){
@@ -138,12 +128,8 @@ function handleMove(request, response) {
     desiredfood = gameData.board.food[cfood];
   }
   for(let x = 0; x < 4; x++){
-    //print(add(gameData.you.head, possibleMoves[x]))
-    //print(within(snekbodylist, add(gameData.you.head, possibleMoves[x])))
     if(!within(snekbodylist, add(gameData.you.head, possibleMoves[x])) && isLegal(add(gameData.you.head, possibleMoves[x]), {height: gameData.board.height, width: gameData.board.width})){
       if(dist(add(gameData.you.head, possibleMoves[x]), desiredfood) < max && !notnear(gameData.board.snakes,add(gameData.you.head, possibleMoves[x]), gameData.you)){
-        
-          //print("Numero Dos")
           max = dist(add(gameData.you.head, possibleMoves[x]), desiredfood);
           move = x;
         
