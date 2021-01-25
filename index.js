@@ -10,10 +10,10 @@ const PORT = process.env.PORT || 3000
 const app = express()
 app.use(bodyParser.json())
 
-app.get('/', handleIndex)
-app.post('/start', handleStart)
-app.post('/move', handleMove)
-app.post('/end', handleEnd)
+app.get('/dev', handleIndex)
+app.post('/dev/start', handleStart)
+app.post('/dev/move', handleMove)
+app.post('/dev/end', handleEnd)
 
 app.listen(PORT, () => console.log(`Battlesnake Server listening at http://127.0.0.1:${PORT}`))
 
@@ -82,6 +82,16 @@ function within(list, obj) {
   }
   return false;
 }
+function where(array, point){
+  let ret = -1;
+  for(let e = 0; e < array.length; e++){
+    if(point.x == array[e].x && point.y == array[e].y){
+      ret = e;
+      break;
+    }
+  }
+  return ret;
+}
 function handleMove(request, response) {
   let t0 = performance.now();
   var gameData = request.body
@@ -97,6 +107,7 @@ function handleMove(request, response) {
 
     }
   }
+  
   grid.setWalkableAt(gameData.you.head.x, gameData.board.height-gameData.you.head.y-1, true);
 
   var possibleMoves = [{x:0,y:1}, {x:0,y:-1}, {x:1,y:0}, {x:-1,y: 0}];
@@ -123,15 +134,22 @@ function handleMove(request, response) {
       lowscore = foods[x];
     }
   }
+  // print(gameData)
   if(gameData.you["length"] > gameData.board.snakes[smallsnakepos]["length"]){
     desiredfood = gameData.board.snakes[smallsnakepos].head;
   }else{
     desiredfood = gameData.board.food[cfood];
   }
-
-  let path = PF.findPath(gameData.you.head.x, gameData.board.height-gameData.you.head.y-1, desiredfood.x, gameData.board.height-1-desiredfood-y, grid);
-  let directionToGo = {x : path[0][0] - path[1][0], y : -(path[0][1] - path[1][1])};
+  grid.setWalkableAt(desiredfood.x, gameData.board.height-desiredfood.y-1, true);
+  let path = finder.findPath(gameData.you.head.x, gameData.board.height-gameData.you.head.y-1, desiredfood.x, gameData.board.height-1-desiredfood.y, grid);
+  print(path.length)
+  let directionToGo = {x : path[0][0] - path[1][0], y : (path[0][1] - path[1][1])};
   print(directionToGo);
+  if(directionToGo.x == -1){
+    directionToGo.x = 1;
+  }else if(directionToGo.x == 1){
+    directionToGo.x = -1;
+  }
 
   for(let x = 0; x < 4; x++){
     if(!within(snekbodylist, add(gameData.you.head, possibleMoves[x])) && isLegal(add(gameData.you.head, possibleMoves[x]), {height: gameData.board.height, width: gameData.board.width})){
@@ -142,7 +160,8 @@ function handleMove(request, response) {
       }
     }
   }
-  move = actualmoves[move];
+  print(where(possibleMoves, directionToGo))
+  move = actualmoves[where(possibleMoves, directionToGo)];
   console.log('MOVE: ' + move)
   console.log("Time taken:", performance.now()-t0);
   response.status(200).send({
