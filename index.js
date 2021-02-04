@@ -5,7 +5,7 @@ var _ = require('lodash');
 const {
   performance
 } = require('perf_hooks');
-const PORT = process.env.PORT || 3000
+const PORT = process.env.PORT || 8080
 
 const app = express()
 app.use(bodyParser.json())
