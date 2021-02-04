@@ -5,7 +5,7 @@ var _ = require('lodash');
 const {
   performance
 } = require('perf_hooks');
-const PORT = process.env.PORT || 3000
+const PORT = process.env.PORT || 8080
 
 const app = express()
 app.use(bodyParser.json())
@@ -99,15 +99,27 @@ function handleMove(request, response) {
   gameData.you.body.pop(gameData.you.length-1);
   var grid = new PF.Grid(gameData.board.width, gameData.board.height); 
   var snekbodylist = [];
-  for(let x = 0; x < gameData.board.snakes.length; x++){
-    for(let i = 0; i < gameData.board.snakes[x].length-1; i++){
+  for(let x = 0; x < gameData.board.snakes.length; x++){ // iterates through the snakes
+    for(let i = 0; i < gameData.board.snakes[x].length-1; i++){ // iterates through the body pieces in each snake except for the tail (a tail is always a valid move unless the other snake is eating.)
       let bodypart = gameData.board.snakes[x].body[i];
       snekbodylist.push(bodypart);
       grid.setWalkableAt(bodypart.x, gameData.board.height-bodypart.y-1, false);
 
     }
   }
-  
+  for(let y = 0; y < gameData.board.height; y++){
+    for(let x = 0; x < gameData.board.width; x++){
+      for(let z = 0; z < gameData.board.snakes.length; z++){
+        if(gameData.you.id != gameData.board.snakes[z].id){
+          let coord = {x: x, y : y};
+          print("e");
+          if(manhattan(coord, gameData.board.snakes[z].head) == 1 && gameData.board.snakes[z].length >= gameData.you.length){
+            grid.setWalkableAt(coord.x, gameData.board.height - coord.y - 1, false);
+          }
+        }
+      }
+    }
+  }
   grid.setWalkableAt(gameData.you.head.x, gameData.board.height-gameData.you.head.y-1, true);
 
   var possibleMoves = [{x:0,y:1}, {x:0,y:-1}, {x:1,y:0}, {x:-1,y: 0}];
@@ -121,7 +133,7 @@ function handleMove(request, response) {
   let smallsnakepos = {};
   for(let x = 0; x < gameData.board.snakes.length; x++){
     if(gameData.board.snakes[x]["length"] < smalllength && gameData.board.snakes[x].id != gameData.you.id){
-      print("Got here")
+      // print("Got here")
       smalllength = gameData.board.snakes[x]["length"];
       smallsnakepos = x;
     }
@@ -129,19 +141,25 @@ function handleMove(request, response) {
   let foods = getscore(gameData.board.snakes, gameData.you, gameData.board.food);
   // find closest food
   for(let x = 0; x < gameData.board.food.length; x++){
-    if(lowscore< foods[x]){
+    if(lowscore< foods[x] && grid.isWalkableAt(gameData.board.food[x].x, gameData.board.height - gameData.board.food[x].y - 1)){
       cfood = x;
       lowscore = foods[x];
     }
   }
   // print(gameData)
   if(gameData.you["length"] > gameData.board.snakes[smallsnakepos]["length"]){
+    
     desiredfood = gameData.board.snakes[smallsnakepos].head;
+    grid.setWalkableAt(desiredfood.x, gameData.board.height-desiredfood.y-1, true);
   }else{
     desiredfood = gameData.board.food[cfood];
   }
-  grid.setWalkableAt(desiredfood.x, gameData.board.height-desiredfood.y-1, true);
+  
   let path = finder.findPath(gameData.you.head.x, gameData.board.height-gameData.you.head.y-1, desiredfood.x, gameData.board.height-1-desiredfood.y, grid);
+  if(path.length == 0){
+    desiredfood = gameData.you.body[gameData.you.length-1]
+  }
+  
   print(path.length)
   let directionToGo = {x : path[0][0] - path[1][0], y : (path[0][1] - path[1][1])};
   print(directionToGo);
@@ -154,8 +172,8 @@ function handleMove(request, response) {
   for(let x = 0; x < 4; x++){
     if(!within(snekbodylist, add(gameData.you.head, possibleMoves[x])) && isLegal(add(gameData.you.head, possibleMoves[x]), {height: gameData.board.height, width: gameData.board.width})){
       if(dist(add(gameData.you.head, possibleMoves[x]), desiredfood) < max && !notnear(gameData.board.snakes,add(gameData.you.head, possibleMoves[x]), gameData.you)){
-          max = dist(add(gameData.you.head, possibleMoves[x]), desiredfood);
-          move = x;
+        max = dist(add(gameData.you.head, possibleMoves[x]), desiredfood);
+        move = x;
         
       }
     }
