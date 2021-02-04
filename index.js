@@ -140,7 +140,7 @@ function handleMove(request, response) {
   let foods = getscore(gameData.board.snakes, gameData.you, gameData.board.food);
   // find closest food
   for(let x = 0; x < gameData.board.food.length; x++){
-    if(lowscore< foods[x]){
+    if(lowscore< foods[x] && grid.isWalkableAt(gameData.board.food[x].x, gameData.board.height - gameData.board.food[x].y - 1)){
       cfood = x;
       lowscore = foods[x];
     }
