@@ -107,8 +107,8 @@ function handleMove(request, response) {
 
     }
   }
-  for(let y = 0; y < gameData.board.width; y++){
-    for(let x = 0; x < gameData.board.height; x++){
+  for(let y = 0; y < gameData.board.height; y++){
+    for(let x = 0; x < gameData.board.width; x++){
       for(let z = 0; z < gameData.board.snakes.length; z++){
         if(gameData.you.id != gameData.board.snakes[z].id){
           let coord = {x: x, y : y};
@@ -148,11 +148,13 @@ function handleMove(request, response) {
   }
   // print(gameData)
   if(gameData.you["length"] > gameData.board.snakes[smallsnakepos]["length"]){
+    
     desiredfood = gameData.board.snakes[smallsnakepos].head;
+    grid.setWalkableAt(desiredfood.x, gameData.board.height-desiredfood.y-1, true);
   }else{
     desiredfood = gameData.board.food[cfood];
   }
-  grid.setWalkableAt(desiredfood.x, gameData.board.height-desiredfood.y-1, true);
+  
   let path = finder.findPath(gameData.you.head.x, gameData.board.height-gameData.you.head.y-1, desiredfood.x, gameData.board.height-1-desiredfood.y, grid);
   print(path.length)
   let directionToGo = {x : path[0][0] - path[1][0], y : (path[0][1] - path[1][1])};
