@@ -156,6 +156,10 @@ function handleMove(request, response) {
   }
   
   let path = finder.findPath(gameData.you.head.x, gameData.board.height-gameData.you.head.y-1, desiredfood.x, gameData.board.height-1-desiredfood.y, grid);
+  if(path.length == 0){
+    desiredfood = gameData.you.body[gameData.you.length-1]
+  }
+  
   print(path.length)
   let directionToGo = {x : path[0][0] - path[1][0], y : (path[0][1] - path[1][1])};
   print(directionToGo);
