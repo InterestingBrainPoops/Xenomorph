@@ -112,7 +112,7 @@ function handleMove(request, response) {
       for(let z = 0; z < gameData.board.snakes.length; z++){
         if(gameData.you.id != gameData.board.snakes[z].id){
           let coord = {x: x, y : y};
-          if(manhattan(coord, gameData.board.snakes[z].head) == 1 && gameData.board.snakes[z].length >= ganeData.you.length){
+          if(manhattan(coord, gameData.board.snakes[z].head) == 1 && gameData.board.snakes[z].length >= gameData.you.length){
             grid.setWalkableAt(coord.x, gameData.board.height - coord.y - 1, false);
           }
         }
