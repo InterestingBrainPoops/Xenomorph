@@ -99,15 +99,26 @@ function handleMove(request, response) {
   gameData.you.body.pop(gameData.you.length-1);
   var grid = new PF.Grid(gameData.board.width, gameData.board.height); 
   var snekbodylist = [];
-  for(let x = 0; x < gameData.board.snakes.length; x++){
-    for(let i = 0; i < gameData.board.snakes[x].length-1; i++){
+  for(let x = 0; x < gameData.board.snakes.length; x++){ // iterates through the snakes
+    for(let i = 0; i < gameData.board.snakes[x].length-1; i++){ // iterates through the body pieces in each snake except for the tail (a tail is always a valid move unless the other snake is eating.)
       let bodypart = gameData.board.snakes[x].body[i];
       snekbodylist.push(bodypart);
       grid.setWalkableAt(bodypart.x, gameData.board.height-bodypart.y-1, false);
 
     }
   }
-  
+  for(let y = 0; y < gameData.board.width; y++){
+    for(let x = 0; x < gameData.board.height; x++){
+      for(let z = 0; z < gameData.board.snakes.length; z++){
+        if(gameData.you.id != gameData.board.snakes[z].id){
+          let coord = {x: x, y : y};
+          if(manhattan(coord, gameData.board.snakes[z].head) == 1 && gameData.board.snakes[z].length >= ganeData.you.length){
+            grid.setWalkableAt(coord.x, gameData.board.height - coord.y - 1, false);
+          }
+        }
+      }
+    }
+  }
   grid.setWalkableAt(gameData.you.head.x, gameData.board.height-gameData.you.head.y-1, true);
 
   var possibleMoves = [{x:0,y:1}, {x:0,y:-1}, {x:1,y:0}, {x:-1,y: 0}];
@@ -121,7 +132,7 @@ function handleMove(request, response) {
   let smallsnakepos = {};
   for(let x = 0; x < gameData.board.snakes.length; x++){
     if(gameData.board.snakes[x]["length"] < smalllength && gameData.board.snakes[x].id != gameData.you.id){
-      print("Got here")
+      // print("Got here")
       smalllength = gameData.board.snakes[x]["length"];
       smallsnakepos = x;
     }
@@ -154,8 +165,8 @@ function handleMove(request, response) {
   for(let x = 0; x < 4; x++){
     if(!within(snekbodylist, add(gameData.you.head, possibleMoves[x])) && isLegal(add(gameData.you.head, possibleMoves[x]), {height: gameData.board.height, width: gameData.board.width})){
       if(dist(add(gameData.you.head, possibleMoves[x]), desiredfood) < max && !notnear(gameData.board.snakes,add(gameData.you.head, possibleMoves[x]), gameData.you)){
-          max = dist(add(gameData.you.head, possibleMoves[x]), desiredfood);
-          move = x;
+        max = dist(add(gameData.you.head, possibleMoves[x]), desiredfood);
+        move = x;
         
       }
     }
